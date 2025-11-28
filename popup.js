@@ -71,8 +71,22 @@ const runnerLink = document.createElement('a');
 runnerLink.textContent = 'Ouvrir l\'auto-test';
 runnerLink.className = 'text-sm text-blue-600';
 runnerLink.target = '_blank';
+// Prefer the local dev server so content scripts run on the test page.
+// If you run `npm run serve`, the test runner is available at http://127.0.0.1:8000/test_runner.html
 try{
-  runnerLink.href = chrome.runtime && chrome.runtime.getURL ? chrome.runtime.getURL('test_runner.html') : 'test_runner.html';
-}catch(e){ runnerLink.href = 'test_runner.html'; }
+  runnerLink.href = 'http://127.0.0.1:8000/test_runner.html';
+}catch(e){ runnerLink.href = chrome.runtime && chrome.runtime.getURL ? chrome.runtime.getURL('test_runner.html') : 'test_runner.html'; }
+// Open the test runner in a new tab using chrome.tabs to ensure it opens even from the popup
+runnerLink.addEventListener('click', function(evt){
+  evt.preventDefault();
+  var url = runnerLink.href;
+  try{
+    if (chrome.tabs && chrome.tabs.create){
+      chrome.tabs.create({ url: url });
+    } else {
+      window.open(url, '_blank');
+    }
+  }catch(e){ window.open(url, '_blank'); }
+});
 linkEl.appendChild(runnerLink);
 document.body.appendChild(linkEl);
