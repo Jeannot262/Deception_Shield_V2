@@ -25,7 +25,13 @@ Depuis le **popup** de l'extension, vous pouvez activer ou désactiver chaque mo
 - **Masquage localStorage** : Retourne des IDs volatiles pour les clés de tracking (défaut : activé).
 - **Pollution Fetch/XHR** : Pollue les requêtes de suivi avec des métriques fakées (défaut : activé).
 
-Les préférences sont sauvegardées dans `chrome.storage.local` et persistées. **Rechargez la page** après un changement pour appliquer.
+Les préférences sont sauvegardées dans `chrome.storage.local` et persistées. Les changements sont désormais appliqués instantanément aux pages ouvertes :
+
+- Le popup écrit les préférences dans `chrome.storage.local` et notifie l'onglet actif.
+- Le content script (`injector.js`) transmet immédiatement les nouveaux flags à la page injectée via `postMessage`.
+- Si nécessaire, vous pouvez forcer l'application locale via la console : `window.__deception_installOverrides({ canvas:false })`.
+
+Dans la plupart des cas, il n'est donc plus nécessaire de recharger la page après avoir changé un toggle.
 
 ## Tests — Deux pages disponibles
 

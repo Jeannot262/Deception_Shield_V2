@@ -33,6 +33,31 @@
           }
           window.addEventListener('message', handleRequest);
 
+          // Also accept runtime messages from popup to push updated flags immediately
+          if (chrome.runtime && chrome.runtime.onMessage && typeof chrome.runtime.onMessage.addListener === 'function'){
+            chrome.runtime.onMessage.addListener(function(message, sender, sendResponse){
+              try{
+                if (!message || message.type !== 'DECEPTION_STORAGE_UPDATED') return;
+                // rebuild flags and post to page
+                chrome.storage.local.get(keys, (res3) => {
+                  const updated2 = {
+                    popup: res3.popupBlockingEnabled === undefined ? true : !!res3.popupBlockingEnabled,
+                    canvas: res3.canvasMaskingEnabled === undefined ? true : !!res3.canvasMaskingEnabled,
+                    webgl: res3.webglMaskingEnabled === undefined ? true : !!res3.webglMaskingEnabled,
+                    audio: res3.audioMaskingEnabled === undefined ? true : !!res3.audioMaskingEnabled,
+                    localStorage: res3.localStorageMaskingEnabled === undefined ? true : !!res3.localStorageMaskingEnabled,
+                    fetch: res3.fetchMaskingEnabled === undefined ? true : !!res3.fetchMaskingEnabled
+                  };
+                  window.postMessage({ type: 'DECEPTION_FLAGS', flags: updated2 }, '*');
+                  Object.assign(flags, updated2);
+                  sendResponse && sendResponse({ ok: true });
+                });
+                // indicate async response
+                return true;
+              }catch(e){}
+            });
+          }
+
           // Watch for storage changes and push updated flags to the page in real-time
           if (chrome.storage && chrome.storage.onChanged && typeof chrome.storage.onChanged.addListener === 'function'){
             chrome.storage.onChanged.addListener(function(changes, areaName){
