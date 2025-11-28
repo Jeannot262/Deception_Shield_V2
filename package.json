@@ -1,0 +1,8 @@
+{
+  "name": "deception_shield_V2",
+  "version": "1.0.0",
+  "description": "Dev helpers for Deception Shield V2",
+  "scripts": {
+    "serve": "npx http-server -p 8000"
+  }
+}

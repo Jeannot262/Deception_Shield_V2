@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <title>Deception Shield - Auto Test Runner</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <style>body{font-family:system-ui,Segoe UI,Arial;margin:20px}pre{background:#f6f8fa;padding:12px;border:1px solid #e1e4e8}</style>
+  </head>
+<body>
+  <h1>Auto Test Runner — Deception Shield V2</h1>
+  <p>Les tests s'exécutent automatiquement au chargement et affichent un rapport succinct.</p>
+
+  <div id="results"></div>
+
+  <h2>Console Log</h2>
+  <pre id="console"></pre>
+
+  <script>
+    const resultsEl = document.getElementById('results');
+    const consoleEl = document.getElementById('console');
+    const logs = [];
+    function log(...args){ logs.push(args.join(' ')); console.log(...args); consoleEl.textContent = logs.join('\n'); }
+
+    function mark(name, status, detail){
+      const el = document.createElement('div');
+      el.innerHTML = `<strong>${name}:</strong> ${status} ${detail?('- '+detail):''}`;
+      resultsEl.appendChild(el);
+    }
+
+    async function runTests(){
+      // 1) LocalStorage
+      try{
+        localStorage.setItem('user_id','original-12345');
+        const val = localStorage.getItem('user_id');
+        if (typeof val === 'string' && val.startsWith('fake-tracking-id-')){
+          mark('LocalStorage', 'PASS', val);
+          log('[TEST] LocalStorage returned fake id:', val);
+        } else {
+          mark('LocalStorage', 'FAIL', val);
+          log('[TEST] LocalStorage returned:', val);
+        }
+      } catch(e){ mark('LocalStorage','ERROR', e.message); log('[TEST] LocalStorage error', e); }
+
+      // 2) Canvas toDataURL (compare two consecutive reads)
+      try{
+        const c = document.createElement('canvas'); c.width=200; c.height=80; const ctx=c.getContext('2d'); ctx.fillStyle='#4CAF50'; ctx.fillRect(0,0,200,80);
+        const a = c.toDataURL();
+        // small delay then read again (some scripts mutate on read)
+        await new Promise(r=>setTimeout(r,50));
+        const b = c.toDataURL();
+        if (a !== b){ mark('Canvas toDataURL (volatile)', 'PASS'); log('[TEST] Canvas dataURL changed between reads'); }
+        else { mark('Canvas toDataURL (volatile)', 'WARN', 'no change detected'); log('[TEST] Canvas dataURL unchanged'); }
+      } catch(e){ mark('Canvas toDataURL','ERROR', e.message); log('[TEST] Canvas toDataURL error', e); }
+
+      // 3) Canvas toBlob
+      try{
+        const c2 = document.createElement('canvas'); c2.width=64; c2.height=32; const ctx2=c2.getContext('2d'); ctx2.fillStyle='#123456'; ctx2.fillRect(0,0,64,32);
+        await new Promise((res)=>{
+          c2.toBlob((blob)=>{
+            if (blob && blob.size>0){ mark('Canvas toBlob','PASS', 'size:'+blob.size); log('[TEST] toBlob size', blob.size); }
+            else { mark('Canvas toBlob','FAIL'); log('[TEST] toBlob returned null/empty'); }
+            res();
+          });
+        });
+      } catch(e){ mark('Canvas toBlob','ERROR', e.message); log('[TEST] Canvas toBlob error', e); }
+
+      // 4) WebGL debug info
+      try{
+        const gl = document.createElement('canvas').getContext('webgl') || document.createElement('canvas').getContext('experimental-webgl');
+        if (!gl){ mark('WebGL','SKIP','not available'); log('[TEST] WebGL not available'); }
+        else {
+          try{
+            const ext = gl.getExtension('WEBGL_debug_renderer_info');
+            if (ext === null){ mark('WebGL debug info','PASS','extension blocked (null)'); log('[TEST] WEBGL_debug_renderer_info is null'); }
+            else { mark('WebGL debug info','WARN','extension present'); log('[TEST] WEBGL_debug_renderer_info present', ext); }
+          } catch(e){ mark('WebGL debug info','ERROR', e.message); log('[TEST] WebGL getExtension error', e); }
+        }
+      } catch(e){ mark('WebGL','ERROR', e.message); log('[TEST] WebGL error', e); }
+
+      // 5) WebGL2 debug info
+      try{
+        const gl2 = document.createElement('canvas').getContext('webgl2');
+        if (!gl2){ mark('WebGL2','SKIP','not available'); log('[TEST] WebGL2 not available'); }
+        else {
+          try{
+            const ext2 = gl2.getExtension('WEBGL_debug_renderer_info');
+            if (ext2 === null){ mark('WebGL2 debug info','PASS','extension blocked (null)'); log('[TEST] WEBGL2 debug extension null'); }
+            else { mark('WebGL2 debug info','WARN','extension present'); log('[TEST] WEBGL2 debug extension present', ext2); }
+          } catch(e){ mark('WebGL2 debug info','ERROR', e.message); log('[TEST] WebGL2 getExtension error', e); }
+        }
+      } catch(e){ mark('WebGL2','ERROR', e.message); log('[TEST] WebGL2 error', e); }
+
+      // 6) WebAudio buffer first sample
+      try{
+        const AudioCtxCtor = window.OfflineAudioContext || window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtxCtor){ mark('WebAudio','SKIP','not available'); log('[TEST] WebAudio not available'); }
+        else {
+          const ctx = new AudioCtxCtor(1,44100,44100);
+          const buffer = ctx.createBuffer(1,44100,44100);
+          const data = buffer.getChannelData(0);
+          if (data && Math.abs(data[0])>0){ mark('WebAudio getChannelData','PASS','first sample non-zero'); log('[TEST] audio sample', data[0]); }
+          else { mark('WebAudio getChannelData','FAIL','first sample zero'); log('[TEST] audio sample is zero', data && data[0]); }
+        }
+      } catch(e){ mark('WebAudio','ERROR', e.message); log('[TEST] WebAudio error', e); }
+
+      mark('Auto Test', 'COMPLETE');
+    }
+
+    window.addEventListener('load', ()=>{ runTests(); });
+  </script>
+</body>
+</html>
