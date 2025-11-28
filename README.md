@@ -3,6 +3,7 @@
 Petit projet d'extension (Content Scripts) visant à rendre le fingerprinting et le tracking moins fiables en polluant ou en masquant certaines API (Canvas, WebGL, WebAudio, localStorage, fetch, etc.).
 
 ## Fichiers clés
+
 - `manifest.json` - manifeste de l'extension (MV3).
 - `canvas_masking.js` - interception de `canvas.toDataURL()` et `toBlob()`.
 - `advanced_fingerprinting_masking.js` - masquage WebGL / WebGL2 / WebAudio.
@@ -56,5 +57,7 @@ Le dépôt a été poussé sur : `https://github.com/Jeannot262/Deception_Shield
 - Ajouter une page interne d'auto-test automatisé.
 
 ---
+
 Auteur : Jeannot262
+
 # Deception_Shield_V2

@@ -13,8 +13,8 @@
  * @returns {string} Un identifiant unique aléatoire.
  */
 function generateFakeId() {
-    // Utilise crypto.randomUUID pour une chaîne UUID unique, parfaite pour le masquage.
-    return 'fake-tracking-id-' + crypto.randomUUID();
+  // Utilise crypto.randomUUID pour une chaîne UUID unique, parfaite pour le masquage.
+  return "fake-tracking-id-" + crypto.randomUUID();
 }
 
 /**
@@ -22,82 +22,121 @@ function generateFakeId() {
  * @returns {number} Un nombre aléatoire entre 1 et 1000.
  */
 function generateRandomMetric() {
-    return Math.floor(Math.random() * 1000) + 1;
+  return Math.floor(Math.random() * 1000) + 1;
 }
 
 // --- 1. Déception du Local Storage ---
 // (Cible les stockages de session et les préférences utilisateur)
 
-console.log("Anti-Tracking: Interception de l'API LocalStorage...");
+// LocalStorage masking (may be toggled by user)
+function applyLocalStorageMasking() {
+  console.log("Anti-Tracking: Interception de l'API LocalStorage...");
 
-// Sauvegarder des références aux fonctions originales (liaison au bon this)
-const originalLocalStorageSetItem = window.localStorage && window.localStorage.setItem ? window.localStorage.setItem.bind(window.localStorage) : null;
-const originalLocalStorageGetItem = window.localStorage && window.localStorage.getItem ? window.localStorage.getItem.bind(window.localStorage) : null;
+  // Sauvegarder des références aux fonctions originales (liaison au bon this)
+  const originalLocalStorageSetItem =
+    window.localStorage && window.localStorage.setItem
+      ? window.localStorage.setItem.bind(window.localStorage)
+      : null;
+  const originalLocalStorageGetItem =
+    window.localStorage && window.localStorage.getItem
+      ? window.localStorage.getItem.bind(window.localStorage)
+      : null;
 
-// Remplacer setItem/getItem de façon sûre en évitant la récursion
-if (originalLocalStorageSetItem && originalLocalStorageGetItem) {
-    window.localStorage.setItem = function(key, value) {
-        const trackingKeys = ['user_id', 'client_id', 'tracker_session', 'cart_id'];
+  // Remplacer setItem/getItem de façon sûre en évitant la récursion
+  if (originalLocalStorageSetItem && originalLocalStorageGetItem) {
+    window.localStorage.setItem = function (key, value) {
+      const trackingKeys = ["user_id", "client_id", "tracker_session", "cart_id"];
 
-        if (trackingKeys.includes(key) || (typeof key === 'string' && (key.includes('google') || key.includes('fb_')))) {
-            const fakeValue = generateFakeId();
-            console.warn(`[DECEPTION ACTIF] localStorage.setItem intercepté pour la clé: ${key}. Stockage de la valeur fausse: ${fakeValue}`);
-            return originalLocalStorageSetItem(key, fakeValue);
-        }
+      if (
+        trackingKeys.includes(key) ||
+        (typeof key === "string" && (key.includes("google") || key.includes("fb_")))
+      ) {
+        const fakeValue = generateFakeId();
+        console.warn(
+          `[DECEPTION ACTIF] localStorage.setItem intercepté pour la clé: ${key}. Stockage de la valeur fausse: ${fakeValue}`
+        );
+        return originalLocalStorageSetItem(key, fakeValue);
+      }
 
-        return originalLocalStorageSetItem(key, value);
+      return originalLocalStorageSetItem(key, value);
     };
 
-    window.localStorage.getItem = function(key) {
-        if (key === 'user_id' || key === 'client_id') {
-            const fakeId = generateFakeId();
-            console.log(`[DECEPTION ACTIF] localStorage.getItem intercepté pour la clé: ${key}. Retourne un ID volatil: ${fakeId}`);
-            return fakeId; // Retourne un ID volatile non persistant
-        }
-        return originalLocalStorageGetItem(key);
+    window.localStorage.getItem = function (key) {
+      if (key === "user_id" || key === "client_id") {
+        const fakeId = generateFakeId();
+        console.log(
+          `[DECEPTION ACTIF] localStorage.getItem intercepté pour la clé: ${key}. Retourne un ID volatil: ${fakeId}`
+        );
+        return fakeId; // Retourne un ID volatile non persistant
+      }
+      return originalLocalStorageGetItem(key);
     };
-} else {
-    console.warn('[DECEPTION] API localStorage non disponible ou restreinte dans ce contexte.');
+  } else {
+    console.warn(
+      "[DECEPTION] API localStorage non disponible ou restreinte dans ce contexte."
+    );
+  }
 }
-
 
 // --- 2. Déception des Appels de Pixel de Suivi (Fetch/XHR) ---
 // (Cible l'envoi de données d'activité au serveur)
 
-console.log("Anti-Tracking: Interception des requêtes Fetch...");
+// Fetch/XHR masking (may be toggled by user)
+function applyFetchMasking() {
+  console.log("Anti-Tracking: Interception des requêtes Fetch...");
 
-const originalFetch = window.fetch;
+  const originalFetch = window.fetch;
 
-window.fetch = async (resource, options) => {
+  window.fetch = async (resource, options) => {
     // Vérifie si l'URL est un endpoint de tracking connu (ex: Google Analytics, Matomo, etc.)
-    const isTrackingRequest = (typeof resource === 'string' && (resource.includes('google-analytics') || resource.includes('pixel') || resource.includes('tracking')));
+    const isTrackingRequest =
+      typeof resource === 'string' &&
+      (resource.includes('google-analytics') || resource.includes('pixel') || resource.includes('tracking'));
 
     if (isTrackingRequest) {
-        let modifiedOptions = { ...options };
+      let modifiedOptions = { ...(options || {}) };
 
-        if (modifiedOptions.body) {
-            // Tentative de modifier le corps de la requête (utile pour les requêtes POST)
-            try {
-                // Si c'est du JSON, injecter de fausses métriques
-                const body = JSON.parse(modifiedOptions.body);
-                body.timeSpent = generateRandomMetric();
-                body.events = body.events ? [...body.events, 'fake_interaction_polluted'] : ['fake_interaction_polluted'];
-                modifiedOptions.body = JSON.stringify(body);
-            } catch (e) {
-                // Si c'est un autre format (ex: form data), on peut simplement ajouter un paramètre pollueur
-                modifiedOptions.body += `&fake_metric=${generateRandomMetric()}`;
-            }
+      if (modifiedOptions.body) {
+        // Tentative de modifier le corps de la requête (utile pour les requêtes POST)
+        try {
+          // Si c'est du JSON, injecter de fausses métriques
+          const body = JSON.parse(modifiedOptions.body);
+          body.timeSpent = generateRandomMetric();
+          body.events = body.events ? [...body.events, 'fake_interaction_polluted'] : ['fake_interaction_polluted'];
+          modifiedOptions.body = JSON.stringify(body);
+        } catch (e) {
+          // Si c'est un autre format (ex: form data), on peut simplement ajouter un paramètre pollueur
+          try {
+            modifiedOptions.body = (modifiedOptions.body || '') + `&fake_metric=${generateRandomMetric()}`;
+          } catch (inner) {}
         }
-        console.warn(`[DECEPTION ACTIF] Requête de suivi interceptée et polluée: ${resource}.`);
-        return originalFetch(resource, modifiedOptions);
+      }
+      console.warn(`[DECEPTION ACTIF] Requête de suivi interceptée et polluée: ${resource}.`);
+      return originalFetch(resource, modifiedOptions);
 
     } else {
-        // Laisse passer toutes les requêtes non-tracking normales
-        return originalFetch(resource, options);
+      // Laisse passer toutes les requêtes non-tracking normales
+      return originalFetch(resource, options);
     }
-};
+  };
 
-console.log("Anti-Tracking Démarré. Les scripts de suivi recevront des données incohérentes.");
+  console.log('Anti-Tracking Démarré. Les scripts de suivi recevront des données incohérentes.');
+}
+
+// Lire les préférences et appliquer les masquages correspondants
+if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+  chrome.storage.local.get(['localStorageMaskingEnabled','fetchMaskingEnabled'], (res) => {
+    const localEnabled = res.localStorageMaskingEnabled === undefined ? true : !!res.localStorageMaskingEnabled;
+    const fetchEnabled = res.fetchMaskingEnabled === undefined ? true : !!res.fetchMaskingEnabled;
+
+    if (localEnabled) applyLocalStorageMasking();
+    if (fetchEnabled) applyFetchMasking();
+  });
+} else {
+  // En dehors d'une extension, activer par défaut
+  applyLocalStorageMasking();
+  applyFetchMasking();
+}
 
 /**
  * NOTE SUR LES COOKIES :
@@ -106,5 +145,3 @@ console.log("Anti-Tracking Démarré. Les scripts de suivi recevront des donnée
  * pour définir des cookies expirant immédiatement ou avec des valeurs aléatoires
  * après que le bandeau de consentement ait simulé l'acceptation.
  */
-
-

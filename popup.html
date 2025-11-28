@@ -46,6 +46,32 @@
         <p class="text-xs mt-2 text-gray-500">Désactiver si des fenêtres légitimes (ex. : banques) sont bloquées.</p>
     </div>
 
+    <!-- SECTION 1.5: Modules -->
+    <div class="bg-white p-4 rounded-lg shadow-md mb-6 border border-gray-200">
+        <div class="mb-2 font-medium">Modules</div>
+        <label class="flex justify-between items-center mb-2">
+            <span class="text-sm">Masquage Canvas</span>
+            <input type="checkbox" id="canvasToggle" class="sr-only">
+        </label>
+        <label class="flex justify-between items-center mb-2">
+            <span class="text-sm">Masquage WebGL / WebGL2</span>
+            <input type="checkbox" id="webglToggle" class="sr-only">
+        </label>
+        <label class="flex justify-between items-center mb-2">
+            <span class="text-sm">Masquage WebAudio</span>
+            <input type="checkbox" id="audioToggle" class="sr-only">
+        </label>
+        <label class="flex justify-between items-center mb-2">
+            <span class="text-sm">Masquage localStorage</span>
+            <input type="checkbox" id="localStorageToggle" class="sr-only">
+        </label>
+        <label class="flex justify-between items-center">
+            <span class="text-sm">Pollution Fetch/XHR</span>
+            <input type="checkbox" id="fetchToggle" class="sr-only">
+        </label>
+        <p class="text-xs mt-2 text-gray-500">Activez / désactivez chaque composant individuellement.</p>
+    </div>
+
     <!-- SECTION 2: État du Masquage -->
     <div class="p-3 bg-blue-100 rounded-lg text-blue-800 text-xs font-semibold flex items-center">
         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944c6.383 0 10.368 4.606 10.368 4.606A11.955 11.955 0 0112 21.056c-6.383 0-10.368-4.606-10.368-4.606A11.955 11.955 0 0112 2.944z"></path></svg>
