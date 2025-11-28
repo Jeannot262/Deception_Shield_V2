@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deception Shield - Configuration</title>
+    <!-- Chargement de Tailwind CSS pour un style rapide et propre -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* S'assurer que la pop-up a une taille fixe et lisible */
+        body {
+            width: 300px;
+            padding: 15px;
+            font-family: 'Inter', sans-serif;
+            background-color: #f8f9fa;
+        }
+        /* Style spécifique pour le toggle switch */
+        .dot {
+            transition: transform 0.2s ease-in-out;
+        }
+        input:checked + .block {
+            background-color: #3b82f6; /* Blue 500 */
+        }
+        input:checked ~ .dot {
+            transform: translateX(100%);
+            background-color: #2563eb; /* Blue 600 */
+        }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <h1 class="text-xl font-bold mb-4 text-blue-700">Deception Shield</h1>
+    <p class="text-sm mb-6 text-gray-600">Protection Anti-Tracking Active.</p>
+
+    <!-- SECTION 1: Blocage des Pop-up -->
+    <div class="bg-white p-4 rounded-lg shadow-md mb-6 border border-gray-200">
+        <label for="popupToggle" class="flex justify-between items-center cursor-pointer">
+            <span class="font-medium text-base">Bloqueur de Pop-up</span>
+            <!-- Toggle Switch (Checkmark) -->
+            <div class="relative">
+                <input type="checkbox" id="popupToggle" class="sr-only">
+                <div class="block bg-gray-300 w-10 h-6 rounded-full transition-colors duration-200 ease-in-out"></div>
+                <div class="dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform duration-200 ease-in-out transform shadow-md"></div>
+            </div>
+        </label>
+        <p class="text-xs mt-2 text-gray-500">Désactiver si des fenêtres légitimes (ex. : banques) sont bloquées.</p>
+    </div>
+
+    <!-- SECTION 2: État du Masquage -->
+    <div class="p-3 bg-blue-100 rounded-lg text-blue-800 text-xs font-semibold flex items-center">
+        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944c6.383 0 10.368 4.606 10.368 4.606A11.955 11.955 0 0112 21.056c-6.383 0-10.368-4.606-10.368-4.606A11.955 11.955 0 0112 2.944z"></path></svg>
+        <span>Masquage Canvas, WebGL, Audio et Déception des données actifs.</span>
+    </div>
+
+    <script src="popup.js"></script>
+</body>
+</html>

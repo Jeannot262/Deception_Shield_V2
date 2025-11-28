@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <title>Deception Shield - Page de Test</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <style>body{font-family:system-ui,Segoe UI,Arial;margin:20px}button{margin:6px 0;padding:8px 12px}</style>
+</head>
+<body>
+  <h1>Deception Shield — Page de Test</h1>
+  <p>Ouvrez la console DevTools pour voir les logs et exécutez les tests ci-dessous.</p>
+
+  <section>
+    <h2>LocalStorage</h2>
+    <button id="ls-set">Set localStorage user_id</button>
+    <button id="ls-get">Get localStorage user_id</button>
+  </section>
+
+  <section>
+    <h2>Canvas</h2>
+    <canvas id="testCanvas" width="200" height="80" style="border:1px solid #ccc"></canvas>
+    <div>
+      <button id="canvas-dataurl">toDataURL()</button>
+      <button id="canvas-toblob">toBlob()</button>
+    </div>
+  </section>
+
+  <section>
+    <h2>WebGL / WebGL2</h2>
+    <canvas id="glCanvas" width="1" height="1" style="display:none"></canvas>
+    <div>
+      <button id="test-webgl">Test WebGL</button>
+      <button id="test-webgl2">Test WebGL2</button>
+    </div>
+  </section>
+
+  <section>
+    <h2>Web Audio</h2>
+    <div>
+      <button id="test-audio">Test AudioBuffer.getChannelData()</button>
+    </div>
+  </section>
+
+  <script>
+    // LocalStorage tests
+    document.getElementById('ls-set').addEventListener('click', () => {
+      console.log('Setting localStorage.user_id = original-12345');
+      localStorage.setItem('user_id', 'original-12345');
+      console.log('Done.');
+    });
+    document.getElementById('ls-get').addEventListener('click', () => {
+      const v = localStorage.getItem('user_id');
+      console.log('localStorage.user_id =>', v);
+    });
+
+    // Canvas tests
+    const canvas = document.getElementById('testCanvas');
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#4CAF50';
+    ctx.fillRect(0,0,200,80);
+
+    document.getElementById('canvas-dataurl').addEventListener('click', () => {
+      try {
+        const data = canvas.toDataURL();
+        console.log('toDataURL length:', data.length, data.slice(0,80));
+      } catch (e) { console.error('toDataURL error', e); }
+    });
+
+    document.getElementById('canvas-toblob').addEventListener('click', () => {
+      try {
+        canvas.toBlob((blob) => {
+          console.log('toBlob size:', blob ? blob.size : 'null');
+        });
+      } catch (e) { console.error('toBlob error', e); }
+    });
+
+    // WebGL tests
+    document.getElementById('test-webgl').addEventListener('click', () => {
+      const gl = document.getElementById('glCanvas').getContext('webgl') || document.getElementById('glCanvas').getContext('experimental-webgl');
+      if (!gl) { console.warn('WebGL non disponible'); return; }
+      try {
+        const vendor = gl.getParameter(gl.VENDOR);
+        const renderer = gl.getParameter(gl.RENDERER);
+        const dbg = gl.getExtension('WEBGL_debug_renderer_info');
+        console.log('WebGL vendor:', vendor);
+        console.log('WebGL renderer:', renderer);
+        console.log('WEBGL_debug_renderer_info extension:', dbg);
+      } catch (e) { console.error('WebGL test error', e); }
+    });
+
+    document.getElementById('test-webgl2').addEventListener('click', () => {
+      const gl2 = document.getElementById('glCanvas').getContext('webgl2');
+      if (!gl2) { console.warn('WebGL2 non disponible'); return; }
+      try {
+        const vendor = gl2.getParameter(gl2.VENDOR);
+        const renderer = gl2.getParameter(gl2.RENDERER);
+        const dbg = gl2.getExtension('WEBGL_debug_renderer_info');
+        console.log('WebGL2 vendor:', vendor);
+        console.log('WebGL2 renderer:', renderer);
+        console.log('WEBGL_debug_renderer_info extension (WebGL2):', dbg);
+      } catch (e) { console.error('WebGL2 test error', e); }
+    });
+
+    // Audio test
+    document.getElementById('test-audio').addEventListener('click', async () => {
+      try {
+        const AudioCtx = window.OfflineAudioContext || window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) { console.warn('Web Audio non disponible'); return; }
+        const ctx = new AudioCtx(1, 44100, 44100);
+        const buffer = ctx.createBuffer(1, 44100, 44100);
+        const data = buffer.getChannelData(0);
+        console.log('AudioBuffer.getChannelData[0]:', data[0]);
+      } catch (e) { console.error('Audio test error', e); }
+    });
+  </script>
+
+  <hr>
+  <p>Instructions:</p>
+  <ol>
+    <li>Charger l'extension en mode développeur et recharger cette page.</li>
+    <li>Ouvrir DevTools (Console) et cliquer sur les boutons pour chaque test.</li>
+    <li>Observer les logs marqués <code>[DECEPTION ACTIF]</code> ou <code>[CLOAKING]</code> dans la console.</li>
+  </ol>
+</body>
+</html>
