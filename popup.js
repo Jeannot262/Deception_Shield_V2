@@ -64,8 +64,15 @@ initToggle(audioToggle, STORAGE_KEYS.audio, true);
 initToggle(localStorageToggle, STORAGE_KEYS.localStorage, true);
 initToggle(fetchToggle, STORAGE_KEYS.fetch, true);
 
-// Link to test runner
+// Link to test runner (use runtime.getURL to point to extension resource)
 const linkEl = document.createElement("div");
 linkEl.style.marginTop = "10px";
-linkEl.innerHTML = `<a href="../test_runner.html" target="_blank" class="text-sm text-blue-600">Ouvrir l'auto-test</a>`;
+const runnerLink = document.createElement('a');
+runnerLink.textContent = 'Ouvrir l\'auto-test';
+runnerLink.className = 'text-sm text-blue-600';
+runnerLink.target = '_blank';
+try{
+  runnerLink.href = chrome.runtime && chrome.runtime.getURL ? chrome.runtime.getURL('test_runner.html') : 'test_runner.html';
+}catch(e){ runnerLink.href = 'test_runner.html'; }
+linkEl.appendChild(runnerLink);
 document.body.appendChild(linkEl);
