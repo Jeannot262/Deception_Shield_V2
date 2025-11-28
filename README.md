@@ -43,10 +43,23 @@ Les préférences sont sauvegardées dans `chrome.storage.local` et persistées.
 
 ## Instructions rapides — Mise en place
 
-### 1. Charger l'extension dans Chrome/Edge (mode développeur)
+### 1. Charger l'extension dans le navigateur (mode développeur)
 
-- Ouvrir `chrome://extensions/` (ou `edge://extensions/`), activer le `Developer mode`.
-- Cliquer sur `Load unpacked` / `Charger l'extension non empaquetée` et sélectionner le dossier `Deception_Shield_V2`.
+#### Sur Chrome
+
+1. Ouvrir `chrome://extensions/`
+2. Activer le `Developer mode` (coin supérieur droit)
+3. Cliquer sur `Load unpacked`
+4. Sélectionner le dossier `Deception_Shield_V2`
+
+#### Sur Edge
+
+1. Ouvrir `edge://extensions/`
+2. Activer le `Developer mode` (coin supérieur gauche, "Mode développeur")
+3. Cliquer sur `Charger l'extension non empaquetée` (ou "Load unpacked")
+4. Sélectionner le dossier `Deception_Shield_V2`
+
+**Note** : L'extension fonctionne de manière identique sur Chrome et Edge (tous deux utilisent le format Manifest V3).
 
 ### 2. Servir les pages de test depuis un serveur local
 
