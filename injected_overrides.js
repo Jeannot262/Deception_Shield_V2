@@ -6,9 +6,12 @@
   const DEFAULT_FLAGS = { popup:true, canvas:true, webgl:true, audio:true, localStorage:true, fetch:true };
 
   // Configurable constants (easy tuning)
-  const AUDIO_NOISE_AMPLITUDE = 1e-7; // amplitude added to a few audio samples
-  const LOCALSTORAGE_FAKE_PREFIX = 'fake-tracking-id-';
-  const LOCALSTORAGE_FAKE_LENGTH = 10; // length of random id suffix
+  // More aggressive-but-safe defaults for stronger fingerprint perturbation
+  // Audio: increase slightly so differences are measurable but still tiny
+  const AUDIO_NOISE_AMPLITUDE = 1e-6; // amplitude added to a few audio samples
+  // localStorage: use a distinct prefix + longer random suffix
+  const LOCALSTORAGE_FAKE_PREFIX = 'decep-id-';
+  const LOCALSTORAGE_FAKE_LENGTH = 16; // length of random id suffix
 
   // Helpful marker to confirm which version loaded
   try{ console.info('[Injection] injected_overrides.js loaded (v2)'); }catch(e){}
