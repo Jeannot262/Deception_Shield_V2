@@ -65,28 +65,59 @@ initToggle(localStorageToggle, STORAGE_KEYS.localStorage, true);
 initToggle(fetchToggle, STORAGE_KEYS.fetch, true);
 
 // Link to test runner (use runtime.getURL to point to extension resource)
-const linkEl = document.createElement("div");
-linkEl.style.marginTop = "10px";
-const runnerLink = document.createElement('a');
-runnerLink.textContent = 'Ouvrir l\'auto-test';
-runnerLink.className = 'text-sm text-blue-600';
-runnerLink.target = '_blank';
-// Prefer the local dev server so content scripts run on the test page.
-// If you run `npm run serve`, the test runner is available at http://127.0.0.1:8000/test_runner.html
-try{
-  runnerLink.href = 'http://127.0.0.1:8000/test_runner.html';
-}catch(e){ runnerLink.href = chrome.runtime && chrome.runtime.getURL ? chrome.runtime.getURL('test_runner.html') : 'test_runner.html'; }
-// Open the test runner in a new tab using chrome.tabs to ensure it opens even from the popup
-runnerLink.addEventListener('click', function(evt){
-  evt.preventDefault();
-  var url = runnerLink.href;
-  try{
-    if (chrome.tabs && chrome.tabs.create){
-      chrome.tabs.create({ url: url });
-    } else {
-      window.open(url, '_blank');
-    }
-  }catch(e){ window.open(url, '_blank'); }
-});
-linkEl.appendChild(runnerLink);
-document.body.appendChild(linkEl);
+// Test runner UI (configured in popup.html)
+const testRunnerUrlInput = document.getElementById('testRunnerUrl');
+const testRunnerOpenBtn = document.getElementById('testRunnerOpen');
+const testRunnerCheckBtn = document.getElementById('testRunnerCheck');
+const serverStatusEl = document.getElementById('serverStatus');
+
+const DEFAULT_RUNNER_URL = 'http://127.0.0.1:8000/test_runner.html';
+
+function saveRunnerUrl(url){
+  try{ chrome.storage.local.set({ testRunnerUrl: url }); }catch(e){}
+}
+
+function loadRunnerUrl(cb){
+  try{ chrome.storage.local.get(['testRunnerUrl'], (res) => { cb(res.testRunnerUrl || DEFAULT_RUNNER_URL); }); }catch(e){ cb(DEFAULT_RUNNER_URL); }
+}
+
+function checkServer(url, timeout = 1500){
+  return new Promise((resolve) => {
+    try{
+      const controller = new AbortController();
+      const id = setTimeout(() => controller.abort(), timeout);
+      fetch(url, { method: 'HEAD', mode: 'no-cors', signal: controller.signal }).then(() => { clearTimeout(id); resolve(true); }).catch(() => { clearTimeout(id); resolve(false); });
+    }catch(e){ resolve(false); }
+  });
+}
+
+function updateServerStatus(ok){
+  if (!serverStatusEl) return;
+  if (ok){ serverStatusEl.textContent = 'Serveur local détecté'; serverStatusEl.style.color = '#059669'; }
+  else { serverStatusEl.textContent = 'Serveur local indisponible (sera utilisé la ressource interne)'; serverStatusEl.style.color = '#b91c1c'; }
+}
+
+// initialize test runner controls
+if (testRunnerUrlInput){
+  loadRunnerUrl((url) => {
+    testRunnerUrlInput.value = url;
+    checkServer(url).then((ok) => updateServerStatus(ok));
+  });
+
+  testRunnerCheckBtn && testRunnerCheckBtn.addEventListener('click', () => {
+    const url = testRunnerUrlInput.value || DEFAULT_RUNNER_URL;
+    checkServer(url).then((ok) => updateServerStatus(ok));
+    saveRunnerUrl(url);
+  });
+
+  testRunnerUrlInput.addEventListener('change', () => { saveRunnerUrl(testRunnerUrlInput.value); });
+
+  testRunnerOpenBtn && testRunnerOpenBtn.addEventListener('click', () => {
+    const url = testRunnerUrlInput.value || DEFAULT_RUNNER_URL;
+    // prefer chrome.tabs.create for popup context
+    try{
+      if (chrome.tabs && chrome.tabs.create){ chrome.tabs.create({ url: url }); }
+      else window.open(url, '_blank');
+    }catch(e){ window.open(url, '_blank'); }
+  });
+}

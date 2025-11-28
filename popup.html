@@ -4,78 +4,208 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Deception Shield - Configuration</title>
-    <!-- Chargement de Tailwind CSS pour un style rapide et propre -->
-    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* S'assurer que la pop-up a une taille fixe et lisible */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
         body {
-            width: 300px;
+            width: 320px;
             padding: 15px;
-            font-family: 'Inter', sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background-color: #f8f9fa;
+            color: #1f2937;
         }
-        /* Style spécifique pour le toggle switch */
-        .dot {
-            transition: transform 0.2s ease-in-out;
+        h1 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: #1e40af;
         }
-        input:checked + .block {
-            background-color: #3b82f6; /* Blue 500 */
+        p {
+            font-size: 0.875rem;
+            color: #6b7280;
+            line-height: 1.4;
         }
-        input:checked ~ .dot {
-            transform: translateX(100%);
-            background-color: #2563eb; /* Blue 600 */
+        .intro-text {
+            margin-bottom: 15px;
+        }
+        .section {
+            background: white;
+            padding: 12px;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            margin-bottom: 15px;
+            border: 1px solid #e5e7eb;
+        }
+        .section-title {
+            font-weight: 600;
+            margin-bottom: 10px;
+            font-size: 0.95rem;
+        }
+        .toggle-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .toggle-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.85rem;
+        }
+        .toggle-switch {
+            position: relative;
+            width: 40px;
+            height: 24px;
+            background-color: #d1d5db;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            flex-shrink: 0;
+        }
+        .toggle-switch input {
+            /* make the checkbox cover the whole toggle so clicks work, keep it invisible */
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            opacity: 0;
+            cursor: pointer;
+            z-index: 2;
+        }
+        .toggle-switch .slider {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 20px;
+            height: 20px;
+            background-color: white;
+            border-radius: 50%;
+            transition: transform 0.2s;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .toggle-switch input:checked + .slider {
+            transform: translateX(16px);
+        }
+        /* unchecked = disabled (red), checked = enabled (green) */
+        .toggle-switch input:checked ~ .toggle-bg {
+            background-color: #10B981; /* green-500 */
+        }
+        .toggle-switch .toggle-bg {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-color: #EF4444; /* red-500 for disabled */
+            border-radius: 12px;
+            transition: background-color 0.2s;
+            z-index: 0;
+        }
+        .toggle-switch .slider {
+            z-index: 2;
+        }
+        .info-box {
+            background: #dbeafe;
+            border-left: 4px solid #3b82f6;
+            padding: 10px 12px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            color: #1e40af;
+            display: flex;
+            gap: 8px;
+        }
+        .help-text {
+            font-size: 0.75rem;
+            color: #9ca3af;
+            margin-top: 6px;
         }
     </style>
 </head>
-<body class="text-gray-800">
-
-    <h1 class="text-xl font-bold mb-4 text-blue-700">Deception Shield</h1>
-    <p class="text-sm mb-6 text-gray-600">Protection Anti-Tracking Active.</p>
+<body>
+    <h1>Deception Shield</h1>
+    <p class="intro-text">Protection Anti-Tracking Active.</p>
 
     <!-- SECTION 1: Blocage des Pop-up -->
-    <div class="bg-white p-4 rounded-lg shadow-md mb-6 border border-gray-200">
-        <label for="popupToggle" class="flex justify-between items-center cursor-pointer">
-            <span class="font-medium text-base">Bloqueur de Pop-up</span>
-            <!-- Toggle Switch (Checkmark) -->
-            <div class="relative">
-                <input type="checkbox" id="popupToggle" class="sr-only">
-                <div class="block bg-gray-300 w-10 h-6 rounded-full transition-colors duration-200 ease-in-out"></div>
-                <div class="dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform duration-200 ease-in-out transform shadow-md"></div>
+    <div class="section">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-weight: 600;">Bloqueur de Pop-up</span>
+            <div class="toggle-switch">
+                <input type="checkbox" id="popupToggle">
+                <div class="slider"></div>
+                <div class="toggle-bg"></div>
             </div>
-        </label>
-        <p class="text-xs mt-2 text-gray-500">Désactiver si des fenêtres légitimes (ex. : banques) sont bloquées.</p>
+        </div>
+        <p class="help-text">Désactiver si des fenêtres légitimes (ex. : banques) sont bloquées.</p>
     </div>
 
-    <!-- SECTION 1.5: Modules -->
-    <div class="bg-white p-4 rounded-lg shadow-md mb-6 border border-gray-200">
-        <div class="mb-2 font-medium">Modules</div>
-        <label class="flex justify-between items-center mb-2">
-            <span class="text-sm">Masquage Canvas</span>
-            <input type="checkbox" id="canvasToggle" class="sr-only">
-        </label>
-        <label class="flex justify-between items-center mb-2">
-            <span class="text-sm">Masquage WebGL / WebGL2</span>
-            <input type="checkbox" id="webglToggle" class="sr-only">
-        </label>
-        <label class="flex justify-between items-center mb-2">
-            <span class="text-sm">Masquage WebAudio</span>
-            <input type="checkbox" id="audioToggle" class="sr-only">
-        </label>
-        <label class="flex justify-between items-center mb-2">
-            <span class="text-sm">Masquage localStorage</span>
-            <input type="checkbox" id="localStorageToggle" class="sr-only">
-        </label>
-        <label class="flex justify-between items-center">
-            <span class="text-sm">Pollution Fetch/XHR</span>
-            <input type="checkbox" id="fetchToggle" class="sr-only">
-        </label>
-        <p class="text-xs mt-2 text-gray-500">Activez / désactivez chaque composant individuellement.</p>
+    <!-- SECTION 2: Modules -->
+    <div class="section">
+        <div class="section-title">Modules de Protection</div>
+        <div class="toggle-group">
+            <div class="toggle-item">
+                <span>Masquage Canvas</span>
+                <div class="toggle-switch">
+                    <input type="checkbox" id="canvasToggle">
+                    <div class="slider"></div>
+                    <div class="toggle-bg"></div>
+                </div>
+            </div>
+            <div class="toggle-item">
+                <span>Masquage WebGL / WebGL2</span>
+                <div class="toggle-switch">
+                    <input type="checkbox" id="webglToggle">
+                    <div class="slider"></div>
+                    <div class="toggle-bg"></div>
+                </div>
+            </div>
+            <div class="toggle-item">
+                <span>Masquage WebAudio</span>
+                <div class="toggle-switch">
+                    <input type="checkbox" id="audioToggle">
+                    <div class="slider"></div>
+                    <div class="toggle-bg"></div>
+                </div>
+            </div>
+            <div class="toggle-item">
+                <span>Masquage localStorage</span>
+                <div class="toggle-switch">
+                    <input type="checkbox" id="localStorageToggle">
+                    <div class="slider"></div>
+                    <div class="toggle-bg"></div>
+                </div>
+            </div>
+            <div class="toggle-item">
+                <span>Pollution Fetch/XHR</span>
+                <div class="toggle-switch">
+                    <input type="checkbox" id="fetchToggle">
+                    <div class="slider"></div>
+                    <div class="toggle-bg"></div>
+                </div>
+            </div>
+        </div>
+        <p class="help-text" style="margin-top: 10px;">Activez / désactivez chaque composant individuellement.</p>
     </div>
 
-    <!-- SECTION 2: État du Masquage -->
-    <div class="p-3 bg-blue-100 rounded-lg text-blue-800 text-xs font-semibold flex items-center">
-        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944c6.383 0 10.368 4.606 10.368 4.606A11.955 11.955 0 0112 21.056c-6.383 0-10.368-4.606-10.368-4.606A11.955 11.955 0 0112 2.944z"></path></svg>
+    <!-- SECTION 3: État du Masquage -->
+    <div class="info-box">
+        <span style="font-weight: bold;">✓</span>
         <span>Masquage Canvas, WebGL, Audio et Déception des données actifs.</span>
+    </div>
+
+    <!-- SECTION 4: Test Runner URL and status -->
+    <div class="section">
+        <div class="section-title">Auto-Test</div>
+        <div style="display:flex;gap:8px;align-items:center;">
+            <input id="testRunnerUrl" type="text" style="flex:1;padding:6px;border:1px solid #e5e7eb;border-radius:6px;font-size:0.85rem;" />
+            <button id="testRunnerOpen" style="padding:6px 8px;border-radius:6px;border:none;background:#2563eb;color:white;cursor:pointer;">Ouvrir</button>
+        </div>
+        <div style="margin-top:8px;font-size:0.8rem;color:#6b7280;display:flex;justify-content:space-between;align-items:center;">
+            <span id="serverStatus">Vérification du serveur...</span>
+            <button id="testRunnerCheck" style="padding:4px 6px;border-radius:6px;border:1px solid #e5e7eb;background:white;cursor:pointer;font-size:0.75rem;">Vérifier</button>
+        </div>
     </div>
 
     <script src="popup.js"></script>
