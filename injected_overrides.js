@@ -49,8 +49,8 @@
     popup: { open: null, Date: null, referrer: null }
   };
 
-  // current applied flags
-  var CURRENT_FLAGS = Object.assign({}, DEFAULT_FLAGS);
+  // current applied flags: start all false so installOverrides enables what's needed
+  var CURRENT_FLAGS = { popup:false, canvas:false, webgl:false, audio:false, localStorage:false, fetch:false };
 
   function enableCanvas(){
     if (!HTMLCanvasElement || !HTMLCanvasElement.prototype) return;
